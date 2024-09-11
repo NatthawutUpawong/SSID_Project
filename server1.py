@@ -11,6 +11,7 @@ from flask import (
     sessions,
     
 )
+
 import bcrypt
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
@@ -27,6 +28,10 @@ import csv
 from ldap3 import Server, Connection, ALL, MODIFY_REPLACE, NTLM, SUBTREE, MODIFY_ADD
 import paramiko
 
+import os
+from dotenv import load_dotenv, dotenv_values
+
+config = dotenv_values(".env")
 
 current_time = datetime.datetime.now()
 logging.basicConfig(level=logging.DEBUG)  # เพิ่มการตั้งค่าการล็อกเพื่อดูข้อผิดพลาด
@@ -120,10 +125,10 @@ def adduser_admin():
         return redirect(url_for('index'))
 # get policy_tag_names ----------------------------------------------------------------------------------------------------
 # Replace these with your WLC details
-hostname = '172.30.99.56'
-port = 22
-username = 'admins'
-password = 'admins'
+hostname = config['IP_WLC']
+port = config['SERVER_PORT']
+username = config['SECRET_USERNAME']
+password = config['SECRET_PASSWORD']
 
 def fetch_policy_tag_names():
     try:
@@ -179,7 +184,7 @@ def testpage():
 
 
 # Connect to MongoDB
-client = MongoClient("mongodb://localhost:27017")
+client = MongoClient(config['MONGO_CLIENT'])
 db = client["mydb"]
 collection = db["ssid"]
 # add local user
@@ -259,11 +264,11 @@ def configure_ssid1():
     post(ssid1, event1, location1, ouGroup, users, daterange1, enddate1)
 
     device = {
-        'device_type': 'cisco_ios',
-        'ip': '172.30.99.56',
-        'username': 'admin',
-        'password': 'CITS@WLC2023',
-        'secret': 'CITS@WLC2023',
+        'device_type':f"{config['DEVIVE_TYPE']}",
+        'ip': f"{config['IP_WLC']}",
+        'username': f"{config['SECRET_USERNAME']}",
+        'password': f"{config['SECRET_PASSWORD']}",
+        'secret': f"{config['SECRET']}"
     }
 
     # Connect to the Cisco device
@@ -346,11 +351,11 @@ def configure_ssid():
         post(ssid, event, location, ouGroup, users, daterange, enddate)
 
         device = {
-            "device_type": "cisco_ios",
-            "ip": "172.30.99.56",
-            "username": "admin",
-            "password": "CITS@WLC2023",
-            "secret": "CITS@WLC2023",
+            'device_type':f"{config['DEVIVE_TYPE']}",
+            'ip': f"{config['IP_WLC']}",
+            'username': f"{config['SECRET_USERNAME']}",
+            'password': f"{config['SECRET_PASSWORD']}",
+            'secret': f"{config['SECRET']}"
               
         }
 
@@ -469,11 +474,11 @@ def configure_ssid2():
    
 
     device = {
-        'device_type': 'cisco_ios',
-        'ip': '172.30.99.56',
-        'username': 'admin',
-        'password': 'CITS@WLC2023',
-        'secret': 'CITS@WLC2023',
+        'device_type':f"{config['DEVIVE_TYPE']}",
+        'ip': f"{config['IP_WLC']}",
+        'username': f"{config['SECRET_USERNAME']}",
+        'password': f"{config['SECRET_PASSWORD']}",
+        'secret': f"{config['SECRET']}"
     }
 
     # Connect to the Cisco device
@@ -556,7 +561,7 @@ def post(ssid, event, location, ouGroup, users, daterange, enddate):
 # แสดงวันที่แบบพุธศักราช
     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")    
     # Connect to the MongoDB server
-    client = MongoClient('mongodb://localhost:27017')
+    client = MongoClient(config['MONGO_CLIENT'])
 
     # Access the database
     db = client['mydb']
@@ -598,7 +603,7 @@ def post(ssid1, event1, location1, ouGroup, users,  enddate1, daterange1):
     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     
     # Connect to the MongoDB server
-    client = MongoClient('mongodb://localhost:27017')
+    client = MongoClient(config['MONGO_CLIENT'])
 
     # Access the database
     db = client['mydb']
@@ -640,7 +645,7 @@ def post(ssid2, event2, location2, ouGroup, users, daterange, enddate):
     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     
     # Connect to the MongoDB server
-    client = MongoClient('mongodb://localhost:27017')
+    client = MongoClient(config['MONGO_CLIENT'])
 
     # Access the database
     db = client['mydb']
@@ -674,7 +679,7 @@ def post(ssid2, event2, location2, ouGroup, users, daterange, enddate):
 def delete_ssid(ssid_id):
     try:
         # Connect to MongoDB
-        client = MongoClient("mongodb://localhost:27017")
+        client = MongoClient(config['MONGO_CLIENT'])
         db = client["mydb"]
         collection = db["ssid"]
 
@@ -686,11 +691,11 @@ def delete_ssid(ssid_id):
 
         # Connect to the Cisco device
         device = {
-            "device_type": "cisco_ios",
-            "ip": "172.30.99.56",
-            "username": "admin",
-            "password": "CITS@WLC2023",  # Example, should be managed securely
-            "secret": "CITS@WLC2023",    # Example, should be managed securely
+            'device_type':f"{config['DEVIVE_TYPE']}",
+            'ip': f"{config['IP_WLC']}",
+            'username': f"{config['SECRET_USERNAME']}",
+            'password': f"{config['SECRET_PASSWORD']}",
+            'secret': f"{config['SECRET']}"
         }
         net_connect = ConnectHandler(**device)
         net_connect.enable()
@@ -760,10 +765,10 @@ def delete_ssid(ssid_id):
 
 
 # server prop----------------------------------------------------------------------------------------------------
-server_address = "ldaps://192.168.1.137:636"
-domain = "test"
-loginun = "Administrator"
-loginpw = "12345678Xx"
+server_address = config['LDAPSERVER_ADDRESS']
+domain = config['DOMAIN_SERVER']
+loginun = config['SECRET_USERADMIN']
+loginpw = config['SECRET_PASSWORDADMIN']
 # server prop----------------------------------------------------------------------------------------------------
 
 # add user in ad ----------------------------------------------------------------------------------------------------
